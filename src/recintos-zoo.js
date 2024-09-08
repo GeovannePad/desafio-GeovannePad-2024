@@ -71,7 +71,29 @@ class RecintosZoo {
         // Entradas e saídas 4. Caso animal informado seja inválido, apresentar erro "Animal inválido" [check]
         if (!(animal.toLowerCase() in this.animaisPermitidos)) { return {"erro": "Animal inválido"} }
         // Entradas e saídas 5. Caso quantidade informada seja inválida, apresentar erro "Quantidade inválida" [check]
-        if (quantidade <= 0) { return {"erro": "Quantidade inválida"} }        
+        if (quantidade <= 0) { return {"erro": "Quantidade inválida"} }   
+        
+        let recintosViaveis = []
+
+        let animalEspecie = animal
+        let animalTamanho = this.animaisPermitidos[animal].tamanho
+        let animalBioma = this.animaisPermitidos[animal].bioma
+        let animalAlimentacao = this.animaisPermitidos[animal].alimentacao
+
+        //console.log(animalEspecie, animalTamanho, animalBioma, animalAlimentacao)
+
+        for (const recintoNr in this.recintos) {
+            let recintoBioma = this.recintos[recintoNr].bioma
+            let recintoTamanhoTotal = this.recintos[recintoNr].tamanhoTotal
+            let recintoAnimaisExistentes = this.recintos[recintoNr].animais
+            let recintoTamanhoRestante = this.recintos[recintoNr].tamanhoTotal
+            for (const recintoAnimal in recintoAnimaisExistentes) {
+                recintoTamanhoRestante -= recintoAnimaisExistentes[recintoAnimal] * this.animaisPermitidos[recintoAnimal].tamanho
+            }
+        
+           
+            console.log(recintoNr, recintoBioma, recintoTamanhoTotal, recintoAnimaisExistentes, recintoTamanhoRestante)
+        }
     }
 }
 
