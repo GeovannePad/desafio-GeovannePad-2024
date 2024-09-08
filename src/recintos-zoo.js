@@ -68,7 +68,10 @@ class RecintosZoo {
 
 
     analisaRecintos(animal, quantidade) {
-
+        // Entradas e saídas 4. Caso animal informado seja inválido, apresentar erro "Animal inválido" [check]
+        if (!(animal.toLowerCase() in this.animaisPermitidos)) { return {"erro": "Animal inválido"} }
+        // Entradas e saídas 5. Caso quantidade informada seja inválida, apresentar erro "Quantidade inválida" [check]
+        if (quantidade <= 0) { return {"erro": "Quantidade inválida"} }        
     }
 }
 
