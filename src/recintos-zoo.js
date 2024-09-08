@@ -66,6 +66,18 @@ class RecintosZoo {
         }
     }
 
+    verificaBiomaAdequado(animalBioma, recintoBioma) {
+        let biomasValidos = []
+    
+        for (const bioma of animalBioma) {
+            if (recintoBioma.indexOf(bioma) > -1) {
+                biomasValidos.push(bioma)
+            }
+        }
+    
+        return biomasValidos
+    }
+
 
     analisaRecintos(animal, quantidade) {
         // Entradas e saídas 4. Caso animal informado seja inválido, apresentar erro "Animal inválido" [check]
@@ -90,6 +102,16 @@ class RecintosZoo {
             for (const recintoAnimal in recintoAnimaisExistentes) {
                 recintoTamanhoRestante -= recintoAnimaisExistentes[recintoAnimal] * this.animaisPermitidos[recintoAnimal].tamanho
             }
+
+            // Regras para encontrar um recinto 1. Um animal se sente confortável se está num bioma adequado [...]
+            let biomasValidos = this.verificaBiomaAdequado(animalBioma, recintoBioma)
+            if (biomasValidos.length === 0) {
+                continue
+            }
+            // Regras para encontrar um recinto 1. [...] e com espaço suficiente para cada indivíduo [check]
+            if (((animalTamanho * quantidade) > recintoTamanhoTotal) || (recintoTamanhoRestante <= 0)) {
+                continue
+            }        
         
            
             console.log(recintoNr, recintoBioma, recintoTamanhoTotal, recintoAnimaisExistentes, recintoTamanhoRestante)
