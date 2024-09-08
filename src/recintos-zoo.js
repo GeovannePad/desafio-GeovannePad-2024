@@ -103,6 +103,13 @@ class RecintosZoo {
                 recintoTamanhoRestante -= recintoAnimaisExistentes[recintoAnimal] * this.animaisPermitidos[recintoAnimal].tamanho
             }
 
+            // Regras para encontrar um recinto 6. Quando há mais de uma espécie no mesmo recinto, é preciso considerar 1 espaço extra ocupado [check]
+            if (!(animalEspecie in recintoAnimaisExistentes) && !(Object.keys(recintoAnimaisExistentes).length === 0)) {
+                recintoTamanhoRestante -= (animalTamanho * quantidade) + 1
+            } else {
+                recintoTamanhoRestante -= animalTamanho * quantidade
+            }               
+
             // Regras para encontrar um recinto 1. Um animal se sente confortável se está num bioma adequado [...]
             let biomasValidos = this.verificaBiomaAdequado(animalBioma, recintoBioma)
             if (biomasValidos.length === 0) {
