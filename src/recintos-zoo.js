@@ -68,23 +68,49 @@ class RecintosZoo {
 
     verificaBiomaAdequado(animalBioma, recintoBioma) {
         let biomasValidos = []
-    
+
         for (const bioma of animalBioma) {
             if (recintoBioma.indexOf(bioma) > -1) {
                 biomasValidos.push(bioma)
             }
         }
-    
+
         return biomasValidos
+    }
+
+    verificaAnimalCarnivoro(animalAlimentacao, animalEspecie, recintoAnimaisExistentes) {
+        let possuiAnimalCarnivoro = true
+
+        if (Object.keys(recintoAnimaisExistentes).length === 0) {
+            possuiAnimalCarnivoro = false
+        }
+
+        if (animalAlimentacao === "Carnívoro") {
+            for (const recintoAnimal in recintoAnimaisExistentes) {
+                if (this.animaisPermitidos[recintoAnimal].alimentacao === "Carnívoro" && (animalEspecie === recintoAnimal)) {
+                    possuiAnimalCarnivoro = false
+                }
+            }
+        }
+
+        if (animalAlimentacao !== "Carnívoro") {
+            for (const animal in recintoAnimaisExistentes) {
+                if (this.animaisPermitidos[animal].alimentacao !== "Carnívoro") {
+                    possuiAnimalCarnivoro = false
+                }
+            }
+        }
+
+        return possuiAnimalCarnivoro
     }
 
 
     analisaRecintos(animal, quantidade) {
         // Entradas e saídas 4. Caso animal informado seja inválido, apresentar erro "Animal inválido" [check]
-        if (!(animal.toLowerCase() in this.animaisPermitidos)) { return {"erro": "Animal inválido"} }
+        if (!(animal.toLowerCase() in this.animaisPermitidos)) { return { "erro": "Animal inválido" } }
         // Entradas e saídas 5. Caso quantidade informada seja inválida, apresentar erro "Quantidade inválida" [check]
-        if (quantidade <= 0) { return {"erro": "Quantidade inválida"} }   
-        
+        if (quantidade <= 0) { return { "erro": "Quantidade inválida" } }
+
         let recintosViaveis = []
 
         let animalEspecie = animal
@@ -92,7 +118,7 @@ class RecintosZoo {
         let animalBioma = this.animaisPermitidos[animal].bioma
         let animalAlimentacao = this.animaisPermitidos[animal].alimentacao
 
-        //console.log(animalEspecie, animalTamanho, animalBioma, animalAlimentacao)
+        console.log(animalEspecie, animalTamanho, animalBioma, animalAlimentacao)
 
         for (const recintoNr in this.recintos) {
             let recintoBioma = this.recintos[recintoNr].bioma
@@ -108,22 +134,29 @@ class RecintosZoo {
                 recintoTamanhoRestante -= (animalTamanho * quantidade) + 1
             } else {
                 recintoTamanhoRestante -= animalTamanho * quantidade
-            }               
+            }
+
+            // Regras para encontrar um recinto 1. [...] e com espaço suficiente para cada indivíduo [check]
+            if (((animalTamanho * quantidade) > recintoTamanhoTotal) || (recintoTamanhoRestante < 0)) {
+                continue
+            }
 
             // Regras para encontrar um recinto 1. Um animal se sente confortável se está num bioma adequado [...]
             let biomasValidos = this.verificaBiomaAdequado(animalBioma, recintoBioma)
             if (biomasValidos.length === 0) {
                 continue
             }
-            // Regras para encontrar um recinto 1. [...] e com espaço suficiente para cada indivíduo [check]
-            if (((animalTamanho * quantidade) > recintoTamanhoTotal) || (recintoTamanhoRestante <= 0)) {
+
+            // Regras para encontrar um recinto 2. Animais carnívoros devem habitar somente com a própria espécie [check]
+            if (this.verificaAnimalCarnivoro(animalAlimentacao, animalEspecie, recintoAnimaisExistentes)) {
                 continue
-            }        
-        
-           
+            }
+
             console.log(recintoNr, recintoBioma, recintoTamanhoTotal, recintoAnimaisExistentes, recintoTamanhoRestante)
         }
     }
 }
 
 export { RecintosZoo as RecintosZoo };
+
+new RecintosZoo().analisaRecintos("hipopotamo", 1)
