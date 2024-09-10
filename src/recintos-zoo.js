@@ -78,6 +78,7 @@ class RecintosZoo {
         return biomasValidos
     }
 
+
     verificaAnimalCarnivoro(animalAlimentacao, animalEspecie, recintoAnimaisExistentes) {
         let possuiAnimalCarnivoro = true
 
@@ -105,58 +106,97 @@ class RecintosZoo {
     }
 
 
+    calculaEspacoExtra(animalEspecie, animalTamanho, quantidade, recintoTamanhoRestante, recintoAnimaisExistentes) {
+        if (!(animalEspecie in recintoAnimaisExistentes) && !(Object.keys(recintoAnimaisExistentes).length === 0)) {
+            recintoTamanhoRestante -= (animalTamanho * quantidade) + 1
+        } else {
+            recintoTamanhoRestante -= animalTamanho * quantidade
+        }
+
+        return recintoTamanhoRestante
+    }
+
+
+    verificaEspacoSuficiente(animalTamanho, quantidade, recintoTamanhoTotal, recintoTamanhoRestante) {
+        if (((animalTamanho * quantidade) > recintoTamanhoTotal) || (recintoTamanhoRestante < 0)) {
+            return true
+        }
+    }
+
+
+    casoAnimalForHipopotamo(animalEspecie, animalBioma, recintoAnimaisExistentes, recintoBioma) {
+        if (animalEspecie === "hipopotamo" && Object.keys(recintoAnimaisExistentes).length !== 0) {
+            if (!(recintoBioma.indexOf(animalBioma[0]) > -1 && recintoBioma.indexOf(animalBioma[1]) > -1)) {
+                return true
+            }
+        }
+    }
+
+
+    casoAnimalForMacaco(animalEspecie, quantidade, recintoAnimaisExistentes) {
+        if (animalEspecie === "macaco" && quantidade === 1) {
+            if ((Object.keys(recintoAnimaisExistentes).length === 0)) {
+                return true
+            }
+        }
+    }
+
+    
     analisaRecintos(animal, quantidade) {
-        // Entradas e saídas 4. Caso animal informado seja inválido, apresentar erro "Animal inválido" [check]
+        // Verifica animal inválido
         if (!(animal.toLowerCase() in this.animaisPermitidos)) { return { "erro": "Animal inválido" } }
-        // Entradas e saídas 5. Caso quantidade informada seja inválida, apresentar erro "Quantidade inválida" [check]
+        // Verifica quantidade inválida de animal 
         if (quantidade <= 0) { return { "erro": "Quantidade inválida" } }
 
+        // Variável para armazenar os recintos viáveis
         let recintosViaveis = []
 
-        let animalEspecie = animal
-        let animalTamanho = this.animaisPermitidos[animal].tamanho
-        let animalBioma = this.animaisPermitidos[animal].bioma
-        let animalAlimentacao = this.animaisPermitidos[animal].alimentacao
-
-        console.log(animalEspecie, animalTamanho, animalBioma, animalAlimentacao)
+        // Dados do animal
+        let animalEspecie = animal.toLowerCase()
+        let animalTamanho = this.animaisPermitidos[animalEspecie].tamanho
+        let animalBioma = this.animaisPermitidos[animalEspecie].bioma
+        let animalAlimentacao = this.animaisPermitidos[animalEspecie].alimentacao
 
         for (const recintoNr in this.recintos) {
+
+            // Dados do recinto
             let recintoBioma = this.recintos[recintoNr].bioma
             let recintoTamanhoTotal = this.recintos[recintoNr].tamanhoTotal
             let recintoAnimaisExistentes = this.recintos[recintoNr].animais
             let recintoTamanhoRestante = this.recintos[recintoNr].tamanhoTotal
+
+            // Calculando o tamanho restante do recinto que já possui animais existentes
             for (const recintoAnimal in recintoAnimaisExistentes) {
                 recintoTamanhoRestante -= recintoAnimaisExistentes[recintoAnimal] * this.animaisPermitidos[recintoAnimal].tamanho
             }
 
-            // Regras para encontrar um recinto 6. Quando há mais de uma espécie no mesmo recinto, é preciso considerar 1 espaço extra ocupado [check]
-            if (!(animalEspecie in recintoAnimaisExistentes) && !(Object.keys(recintoAnimaisExistentes).length === 0)) {
-                recintoTamanhoRestante -= (animalTamanho * quantidade) + 1
-            } else {
-                recintoTamanhoRestante -= animalTamanho * quantidade
-            }
+            // Regra 6
+            recintoTamanhoRestante = this.calculaEspacoExtra(animalEspecie, animalTamanho, quantidade, recintoTamanhoRestante, recintoAnimaisExistentes)
 
-            // Regras para encontrar um recinto 1. [...] e com espaço suficiente para cada indivíduo [check]
-            if (((animalTamanho * quantidade) > recintoTamanhoTotal) || (recintoTamanhoRestante < 0)) {
-                continue
-            }
-
-            // Regras para encontrar um recinto 1. Um animal se sente confortável se está num bioma adequado [...]
+            // Regra 1
+            if (this.verificaEspacoSuficiente(animalTamanho, quantidade, recintoTamanhoTotal, recintoTamanhoRestante)) { continue }
             let biomasValidos = this.verificaBiomaAdequado(animalBioma, recintoBioma)
-            if (biomasValidos.length === 0) {
-                continue
-            }
+            if (biomasValidos.length === 0) { continue }
 
-            // Regras para encontrar um recinto 2. Animais carnívoros devem habitar somente com a própria espécie [check]
-            if (this.verificaAnimalCarnivoro(animalAlimentacao, animalEspecie, recintoAnimaisExistentes)) {
-                continue
-            }
+            // Regra 2 e Regra 3
+            if (this.verificaAnimalCarnivoro(animalAlimentacao, animalEspecie, recintoAnimaisExistentes)) { continue }
+            // Regra 4 e Regra 3
+            if (this.casoAnimalForHipopotamo(animalEspecie, animalBioma, recintoAnimaisExistentes, recintoBioma)) { continue }
+            // Regra 5 e Regra 3
+            if (this.casoAnimalForMacaco(animalEspecie, quantidade, recintoAnimaisExistentes)) { continue }
 
-            console.log(recintoNr, recintoBioma, recintoTamanhoTotal, recintoAnimaisExistentes, recintoTamanhoRestante)
+            // Montando a mensagem do recinto válido e adicionando aos recintos viáveis
+            let recintoValidado = "Recinto " + recintoNr + " (espaço livre: " + recintoTamanhoRestante + " total: " + recintoTamanhoTotal + ")"
+            recintosViaveis.push(recintoValidado)
         }
+
+        // Verifica se há ou não algum recinto viável
+        if (recintosViaveis.length === 0) {
+            return { erro: "Não há recinto viável" }
+        }
+
+        return { recintosViaveis: recintosViaveis }
     }
 }
 
 export { RecintosZoo as RecintosZoo };
-
-new RecintosZoo().analisaRecintos("hipopotamo", 1)
